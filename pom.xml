@@ -26,6 +26,13 @@
         </license>
     </licenses>
 
+    <scm>
+        <url>https://svn.apache.org/viewvc/maven</url>
+        <connection>scm:git:git://github.com/Playtika/feign-reactive.git</connection>
+        <developerConnection>scm:git:git@github.com:Playtika/feign-reactive.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
     <developers>
         <developer>
             <id>kptfh</id>
@@ -554,15 +561,15 @@
                     <!--</execution>-->
                 <!--</executions>-->
             <!--</plugin>-->
-            <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.4.1</version>
-                <configuration>
-                    <useReleaseProfile>false</useReleaseProfile>
-                    <releaseProfiles>release</releaseProfiles>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                </configuration>
-            </plugin>
+            <!--<plugin>-->
+                <!--<artifactId>maven-release-plugin</artifactId>-->
+                <!--<version>2.4.1</version>-->
+                <!--<configuration>-->
+                    <!--<useReleaseProfile>false</useReleaseProfile>-->
+                    <!--<releaseProfiles>release</releaseProfiles>-->
+                    <!--<autoVersionSubmodules>true</autoVersionSubmodules>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 
