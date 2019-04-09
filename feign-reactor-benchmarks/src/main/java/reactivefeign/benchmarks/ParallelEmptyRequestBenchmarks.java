@@ -5,11 +5,8 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -40,30 +37,30 @@ public class ParallelEmptyRequestBenchmarks extends RealRequestBenchmarks{
   //NO PAYLOAD
 
   @Benchmark
-  public void feignEmptyPayload() throws ExecutionException, InterruptedException {
+  public Void feignEmptyPayload() throws ExecutionException, InterruptedException {
 
     CompletableFuture[] bonusesCompletableFutures = IntStream.range(0, CALLS_NUMBER)
             .mapToObj(runnable -> CompletableFuture.runAsync(() -> feign.justGet(), executor))
             .toArray(CompletableFuture[]::new);
 
-    CompletableFuture.allOf(bonusesCompletableFutures).get();
+    return CompletableFuture.allOf(bonusesCompletableFutures).get();
   }
 
   /**
    * How fast can we execute get commands synchronously using reactive web client based Feign?
    */
   @Benchmark
-  public void webClient() {
+  public Object[] webClient() {
 
-    Mono.zip(IntStream.range(0, CALLS_NUMBER)
+    return Mono.zip(IntStream.range(0, CALLS_NUMBER)
                     .mapToObj(i -> webClientFeign.justGet())
                     .collect(Collectors.toList()),
             values -> values).block();
   }
 
   @Benchmark
-  public void jetty() {
-    Mono.zip(IntStream.range(0, CALLS_NUMBER)
+  public Object[] jetty() {
+    return Mono.zip(IntStream.range(0, CALLS_NUMBER)
                     .mapToObj(i -> jettyFeign.justGet())
                     .collect(Collectors.toList()),
             values -> values).block();
@@ -78,16 +75,16 @@ public class ParallelEmptyRequestBenchmarks extends RealRequestBenchmarks{
   }
 
   @Benchmark
-  public void java11() {
-    Mono.zip(IntStream.range(0, CALLS_NUMBER)
+  public Object[] java11() {
+    return Mono.zip(IntStream.range(0, CALLS_NUMBER)
                     .mapToObj(i -> java11Feign.justGet())
                     .collect(Collectors.toList()),
             values -> values).block();
   }
 
   @Benchmark
-  public void java11H2c() {
-    Mono.zip(IntStream.range(0, CALLS_NUMBER)
+  public Object[] java11H2c() {
+    return Mono.zip(IntStream.range(0, CALLS_NUMBER)
                     .mapToObj(i -> java11FeignH2c.justGet())
                     .collect(Collectors.toList()),
             values -> values).block();

@@ -40,8 +40,8 @@ public class ParallelRequestBenchmarks extends RealRequestBenchmarks{
   //WITH PAYLOAD
 
   @Benchmark
-  public void webClient() {
-    Mono.zip(IntStream.range(0, CALLS_NUMBER)
+  public Object[] webClient() {
+    return Mono.zip(IntStream.range(0, CALLS_NUMBER)
                     .mapToObj(i -> webClient
                             .method(HttpMethod.POST)
                             .uri(SERVER_URL+PATH_WITH_PAYLOAD)
@@ -54,52 +54,52 @@ public class ParallelRequestBenchmarks extends RealRequestBenchmarks{
   }
 
   @Benchmark
-  public void feign() throws ExecutionException, InterruptedException {
+  public Void feign() throws ExecutionException, InterruptedException {
     CompletableFuture[] bonusesCompletableFutures = IntStream.range(0, CALLS_NUMBER)
             .mapToObj(runnable -> CompletableFuture.runAsync(() -> feign.postWithPayload(requestPayload), executor))
             .toArray(CompletableFuture[]::new);
 
-    CompletableFuture.allOf(bonusesCompletableFutures).get();
+    return CompletableFuture.allOf(bonusesCompletableFutures).get();
   }
 
   /**
    * How fast can we execute get commands synchronously using reactive web client based Feign?
    */
   @Benchmark
-  public void feignWebClient() {
-    Mono.zip(IntStream.range(0, CALLS_NUMBER)
+  public Object[] feignWebClient() {
+    return Mono.zip(IntStream.range(0, CALLS_NUMBER)
                     .mapToObj(i -> webClientFeign.postWithPayload(Mono.just(requestPayload)))
                     .collect(Collectors.toList()),
             values -> values).block();
   }
 
   @Benchmark
-  public void feignJetty() {
-    Mono.zip(IntStream.range(0, CALLS_NUMBER)
+  public Object[] feignJetty() {
+    return Mono.zip(IntStream.range(0, CALLS_NUMBER)
                     .mapToObj(i -> jettyFeign.postWithPayload(Mono.just(requestPayload)))
                     .collect(Collectors.toList()),
             values -> values).block();
   }
 
   @Benchmark
-  public void feignJettyH2c() {
-    Mono.zip(IntStream.range(0, CALLS_NUMBER)
+  public Object[] feignJettyH2c() {
+    return Mono.zip(IntStream.range(0, CALLS_NUMBER)
                     .mapToObj(i -> jettyFeignH2c.postWithPayload(Mono.just(requestPayload)))
                     .collect(Collectors.toList()),
             values -> values).block();
   }
 
   @Benchmark
-  public void feignJava11() {
-    Mono.zip(IntStream.range(0, CALLS_NUMBER)
+  public Object[] feignJava11() {
+    return Mono.zip(IntStream.range(0, CALLS_NUMBER)
                     .mapToObj(i -> java11Feign.postWithPayload(Mono.just(requestPayload)))
                     .collect(Collectors.toList()),
             values -> values).block();
   }
 
   @Benchmark
-  public void feignJava11H2c() {
-    Mono.zip(IntStream.range(0, CALLS_NUMBER)
+  public Object[] feignJava11H2c() {
+    return Mono.zip(IntStream.range(0, CALLS_NUMBER)
                     .mapToObj(i -> java11FeignH2c.postWithPayload(Mono.just(requestPayload)))
                     .collect(Collectors.toList()),
             values -> values).block();

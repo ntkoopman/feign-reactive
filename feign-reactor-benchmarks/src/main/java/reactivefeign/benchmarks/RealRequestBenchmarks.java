@@ -106,7 +106,7 @@ abstract public class RealRequestBenchmarks {
 
         jettyH2cClient = new HttpClient(transport, null);
         jettyH2cClient.start();
-        jettyFeignH2c = JettyReactiveFeign.<FeignReactorTestInterface>builder()
+        jettyFeignH2c = JettyReactiveFeign.<FeignReactorTestInterface>builder(jettyH2cClient)
                 .options(new JettyReactiveOptions.Builder().setUseHttp2(true).build())
                 .target(FeignReactorTestInterface.class, SERVER_H2C_URL);
         //to settle TCP connection
