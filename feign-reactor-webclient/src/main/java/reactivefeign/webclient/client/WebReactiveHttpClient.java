@@ -18,9 +18,11 @@ package reactivefeign.webclient.client;
 
 import feign.MethodMetadata;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -29,6 +31,7 @@ import reactivefeign.client.ReactiveHttpClient;
 import reactivefeign.client.ReactiveHttpRequest;
 import reactivefeign.client.ReactiveHttpResponse;
 import reactivefeign.client.ReadTimeoutException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.ParameterizedType;
@@ -92,9 +95,29 @@ public class WebReactiveHttpClient implements ReactiveHttpClient {
 	}
 
 	protected BodyInserter<?, ? super ClientHttpRequest> provideBody(ReactiveHttpRequest request) {
-		return bodyActualType != null
-                ? BodyInserters.fromPublisher(request.body(), bodyActualType)
-                : BodyInserters.empty();
+		if (bodyActualType != null) {
+			if (isMultipart()) {
+				return multiPartBody((Flux)request.body());
+			} else {
+				return BodyInserters.fromPublisher(request.body(), bodyActualType);
+			}
+		}
+		return  BodyInserters.empty();
+	}
+
+	protected BodyInserter<?, ? super ClientHttpRequest> multiPartBody(Flux<Part> partsFlux){
+		return (clientHttpRequest, context) -> partsFlux.flatMap(
+				part -> BodyInserters.fromMultipartAsyncData(part.name(), part.content(), DataBuffer.class)
+						.insert(clientHttpRequest, context))
+				.then();
+	}
+
+	private boolean isMultipart() {
+		try {
+			return Class.forName(bodyActualType.getType().getTypeName()).isAssignableFrom(Part.class);
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
 	}
 
 	protected void setUpHeaders(ReactiveHttpRequest request, HttpHeaders httpHeaders) {
